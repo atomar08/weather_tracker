@@ -12,6 +12,7 @@ def convert_to_datetime(value):
         raise DatetimeConversionException()
     return value
 
+
 def convert_to_string(value):
     try:
         value = value.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'

@@ -2,12 +2,11 @@ from .measurement import Measurement
 from werkzeug.exceptions import abort
 
 complete_measurement_data = {}
-
+timestamp_list = []
 
 def add_measurement(measurement):
     print("complete_measurement_data: {}".format(complete_measurement_data))
     timestamp = measurement.get_timestamp()
-    print("adding {} metrics, type {}".format(timestamp, type(timestamp)))
 
     if timestamp in complete_measurement_data:
         print("found previous measurement")
@@ -18,6 +17,7 @@ def add_measurement(measurement):
     else:
         print("new measurements")
         complete_measurement_data[timestamp] = measurement
+        timestamp_list.append(timestamp)
 
     # for debugging purpose:
     print("Current complete_measurement_data")
@@ -42,5 +42,29 @@ def get_measurement(date):
 
 
 def query_measurements(start_date, end_date):
-    # TODO:
-    abort(501)
+    start_index = end_index = -1
+    selected_measurement_lis = []
+
+    if start_date >= end_date or len(timestamp_list) < 2:
+        return selected_measurement_lis
+
+    if start_date in timestamp_list:
+        start_index = timestamp_list.index(start_date)
+
+    if end_date in timestamp_list:
+        end_index = timestamp_list.index(end_date)
+    else:
+        # Assumption: if end_date not present in 'timestamp_list' then consider last date in list as end date
+        end_index = len(timestamp_list) - 1
+
+    if start_index == -1 or end_index == -1:
+        return []
+
+    index = start_index
+    while index < end_index:
+        timestamp = timestamp_list[index]
+        selected_measurement_lis.append(complete_measurement_data.get(timestamp))
+        index += 1
+
+    print("selected list in query_measurements {}".format(selected_measurement_lis))
+    return selected_measurement_lis
