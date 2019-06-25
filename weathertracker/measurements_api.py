@@ -5,12 +5,13 @@ from werkzeug.exceptions import abort
 
 from weathertracker.utils.conversion import (
     convert_to_datetime,
+    convert_to_string,
     DatetimeConversionException,
 )
 
 app = Flask(__name__)
 from .measurement import Measurement
-from .measurement_store import add_measurement
+from .measurement_store import add_measurement, get_measurement
 
 
 class MeasurementsAPI(MethodView):
@@ -54,10 +55,23 @@ class MeasurementsAPI(MethodView):
 
     # features/01-measurements/02-get-measurement.feature
     def get(self, timestamp):
+        print("received get request for {}".format(timestamp))
         try:
             timestamp = convert_to_datetime(timestamp)
         except DatetimeConversionException:
             return abort(400)
 
-        # TODO:
-        abort(501)
+        measurement = get_measurement(timestamp)
+        print("received response {}".format(measurement))
+        if 'timestamp' not in measurement:
+            abort(404, "information not available")
+
+        try:
+            measurement['timestamp'] = convert_to_string(measurement['timestamp'])
+        except DatetimeConversionException as dce:
+            print("error converting datetime object to string")
+            abort(501)
+
+        response = jsonify(measurement)
+        response.status_code = 201
+        return response

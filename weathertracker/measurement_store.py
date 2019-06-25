@@ -7,7 +7,7 @@ complete_measurement_data = {}
 def add_measurement(measurement):
     print("complete_measurement_data: {}".format(complete_measurement_data))
     timestamp = measurement.get_timestamp()
-    print("adding {} metrics".format(timestamp))
+    print("adding {} metrics, type {}".format(timestamp, type(timestamp)))
 
     if timestamp in complete_measurement_data:
         print("found previous measurement")
@@ -29,8 +29,16 @@ def add_measurement(measurement):
 
 
 def get_measurement(date):
-    # TODO:
-    abort(501)
+    result = {}
+    if date not in complete_measurement_data:
+        print("timestamp {} not present, type {}".format(date, type(date)))
+        return result
+    else:
+        measurement = complete_measurement_data[date]
+        print("found info, timestamp {}, type {}".format(measurement.get_timestamp(), type(measurement.get_timestamp())))
+        result['timestamp'] = measurement.get_timestamp()
+        result.update(measurement.get_metrics())
+        return result
 
 
 def query_measurements(start_date, end_date):
